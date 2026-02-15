@@ -60,17 +60,12 @@ Each group must submit a professional PDF report containing:
 1. **Executive Summary:** High-level risk assessment.
 2. **Vulnerability Writeups (x6):** 
     - Description, Impact, and Root Cause analysis.
-    - **Proof of Exploitation:** Screenshots of request/response (Burp/ZAP).
+    - **Proof of Exploitation:** Screenshots.
     - **Indicator of Compromise (IoC):** SIEM screenshots or queries showing the "digital footprint" of the attack.
 3. **Remediation:** Proposed code-level fixes for the vulnerabilities.
 
 ---
 
-## 5) Academic Integrity and Ethics
-
-- Perform attacks **ONLY** against your local lab environment.
-- Do **NOT** share working exploit steps with other groups.
-- Do **NOT** search for or publish solutions online.
 
 ---
 

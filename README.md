@@ -49,7 +49,7 @@ This repository contains a Docker-based deployment. While you are free to deploy
 ### Important Note on Networking
 If you choose to integrate a reverse proxy (like Nginx) or a SIEM tool (like Splunk or ELK), you may need to modify the default port mappings in `docker-compose.yml`. Ensure your proxy is correctly routing traffic to the internal services.
 
----
+
 
 
 ---
@@ -64,7 +64,7 @@ Each group must submit a professional PDF report containing:
     - **Indicator of Compromise (IoC):** SIEM screenshots or queries showing the "digital footprint" of the attack.
 3. **Remediation:** Proposed code-level fixes for the vulnerabilities.
 
----
+
 
 
 ---

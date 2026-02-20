@@ -263,7 +263,6 @@ export function* contactMechanic(action: MyAction): Generator<any, void, any> {
       "Content-Type": "application/json",
       Authorization: `Bearer ${accessToken}`,
     };
-    const http_host = new URL(window.location.href).origin;
     const responseJson = yield fetch(postUrl, {
       headers,
       method: "POST",
@@ -271,11 +270,7 @@ export function* contactMechanic(action: MyAction): Generator<any, void, any> {
         mechanic_code: mechanicCode,
         problem_details: problemDetails,
         vin,
-        mechanic_api:
-          http_host +
-          "/" +
-          APIService.WORKSHOP_SERVICE +
-          requestURLS.RECEIVE_REPORT,
+        mechanic_api: "http://crapi_reverse_proxy/workshop/api/mechanic/receive_report",
         repeat_request_if_failed: false,
         number_of_repeats: 1,
       }),

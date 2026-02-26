@@ -12,7 +12,37 @@
 # limitations under the License.
 
 
+import json
 import logging
+import os
+from datetime import datetime
+
+
+def log_security_event(event_name, user_id, action_details, severity="INFO"):
+    log_dir = '/var/log/crapi'
+    log_file = os.path.join(log_dir, 'workshop_security.jsonl')
+
+    if not os.path.exists(log_dir):
+        try:
+            os.makedirs(log_dir, exist_ok=True)
+            os.chmod(log_dir, 0o777)
+        except OSError:
+            pass  # Fail silently if no directory permissions
+
+    event = {
+        "timestamp": datetime.utcnow().isoformat() + "Z",
+        "service": "crapi-workshop",
+        "severity": severity,
+        "event_name": event_name,
+        "user_id": str(user_id),
+        "details": action_details
+    }
+
+    try:
+        with open(log_file, 'a') as f:
+            f.write(json.dumps(event) + '\n')
+    except Exception as e:
+        logging.getLogger().error(f"Security Log Error: {e}")
 
 
 def log_error(url, params, status_code, message):

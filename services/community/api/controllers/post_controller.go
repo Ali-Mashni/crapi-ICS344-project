@@ -23,6 +23,7 @@ import (
 
 	"crapi.proj/goservice/api/models"
 	"crapi.proj/goservice/api/responses"
+	"crapi.proj/goservice/api/utils"
 	"github.com/gorilla/mux"
 )
 
@@ -53,9 +54,16 @@ func (s *Server) AddNewPost(w http.ResponseWriter, r *http.Request) {
 
 	savedPost, err := models.SavePost(s.Client, post)
 	if err != nil {
+		utils.LogSecurityEvent("POST_CREATED", post.Author.Email, "ERROR", map[string]interface{}{
+			"error": err.Error(),
+		})
 		responses.ERROR(w, http.StatusInternalServerError, err)
+		return
 	}
 
+	utils.LogSecurityEvent("POST_CREATED", post.Author.Email, "INFO", map[string]interface{}{
+		"post_id": savedPost.ID,
+	})
 	responses.JSON(w, http.StatusOK, savedPost)
 }
 

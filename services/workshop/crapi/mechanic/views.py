@@ -33,7 +33,7 @@ from crapi_site import settings
 from utils.jwt import jwt_auth_required
 from utils import messages
 from crapi.user.models import User, Vehicle, UserDetails
-from utils.logging import log_error
+from utils.logging import log_error, log_security_event
 from .models import Mechanic, ServiceRequest, ServiceComment
 from .serializers import (
     MechanicSerializer,
@@ -233,6 +233,12 @@ class GetReportView(APIView):
                 status=status.HTTP_400_BAD_REQUEST,
             )
         service_request = ServiceRequest.objects.filter(id=report_id).first()
+        log_security_event(
+            event_name="MECHANIC_REPORT_ACCESSED",
+            user_id=request.user.id if request.user.is_authenticated else "unknown",
+            action_details={"report_id": report_id, "success": bool(service_request)},
+            severity="INFO" if service_request else "WARNING"
+        )
         if not service_request:
             return Response(
                 {"message": messages.REPORT_DOES_NOT_EXIST},

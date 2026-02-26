@@ -22,10 +22,13 @@ import com.crapi.model.*;
 import com.crapi.service.OtpService;
 import com.crapi.service.UserRegistrationService;
 import com.crapi.service.UserService;
+import com.crapi.utils.SecurityLogger;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -56,8 +59,18 @@ public class AuthController {
   public ResponseEntity<JwtResponse> authenticateUser(@Valid @RequestBody LoginForm loginForm)
       throws UnsupportedEncodingException {
     try {
-      return userService.authenticateUserLogin(loginForm);
+      ResponseEntity<JwtResponse> response = userService.authenticateUserLogin(loginForm);
+      Map<String, Object> details = new HashMap<>();
+      details.put("status", response.getStatusCode().value());
+      String severity = response.getStatusCode().is2xxSuccessful() ? "INFO" : "WARNING";
+      String eventName =
+          response.getStatusCode().is2xxSuccessful() ? "LOGIN_SUCCESS" : "LOGIN_FAILURE";
+      SecurityLogger.logEvent(eventName, loginForm.getEmail(), details, severity);
+      return response;
     } catch (BadCredentialsException e) {
+      Map<String, Object> details = new HashMap<>();
+      details.put("reason", "bad_credentials");
+      SecurityLogger.logEvent("LOGIN_FAILURE", loginForm.getEmail(), details, "WARNING");
       JwtResponse jwtResponse = new JwtResponse();
       jwtResponse.setMessage(UserMessage.INVALID_CREDENTIALS);
       return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(jwtResponse);

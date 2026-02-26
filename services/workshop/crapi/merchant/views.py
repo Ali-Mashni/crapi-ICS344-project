@@ -28,7 +28,7 @@ from crapi.mechanic.serializers import (
 from utils.jwt import jwt_auth_required
 from utils import messages
 from rest_framework.pagination import LimitOffsetPagination
-from utils.logging import log_error
+from utils.logging import log_error, log_security_event
 from crapi_site import settings
 from crapi.mechanic.models import ServiceRequest, ServiceComment
 from .serializers import ContactMechanicSerializer, UserServiceRequestSerializer
@@ -119,6 +119,11 @@ class ContactMechanicView(APIView):
             mechanic_response = mechanic_response.json()
         except ValueError:
             mechanic_response = mechanic_response.text
+        log_security_event(
+            "MECHANIC_CONTACTED",
+            user.id,
+            {"mechanic_api": request_data.get("mechanic_api"), "response_status": mechanic_response_status},
+        )
         return Response(
             {
                 "response_from_mechanic_api": mechanic_response,

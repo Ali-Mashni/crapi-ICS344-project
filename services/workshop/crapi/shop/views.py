@@ -38,7 +38,7 @@ from utils.jwt import jwt_auth_required
 from utils import messages
 from crapi.shop.models import Order, Product, AppliedCoupon, Coupon
 from crapi.user.models import UserDetails
-from utils.logging import log_error
+from utils.logging import log_error, log_security_event
 from django.core.exceptions import ObjectDoesNotExist
 from rest_framework.pagination import LimitOffsetPagination
 
@@ -206,6 +206,11 @@ class OrderControlView(APIView):
             transaction_id=uuid.uuid4(),
         )
         user_details.save()
+        log_security_event(
+            "PRODUCT_PURCHASED",
+            user.id,
+            {"product_id": request_data["product_id"], "quantity": request_data["quantity"], "order_id": order.id},
+        )
         return Response(
             {
                 "id": order.id,
@@ -331,6 +336,11 @@ class ReturnOrder(APIView):
         order.status = Order.STATUS_CHOICES.RETURN_PENDING.value
         order.save()
         serializer = OrderSerializer(order)
+        log_security_event(
+            "PRODUCT_RETURNED",
+            user.id,
+            {"order_id": order.id},
+        )
         return Response(
             {
                 "message": messages.ORDER_RETURNING,

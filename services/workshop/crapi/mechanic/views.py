@@ -33,7 +33,7 @@ from crapi_site import settings
 from utils.jwt import jwt_auth_required
 from utils import messages
 from crapi.user.models import User, Vehicle, UserDetails
-from utils.logging import log_error
+from utils.logging import log_error, log_security_event
 from .models import Mechanic, ServiceRequest, ServiceComment
 from .serializers import (
     MechanicSerializer,
@@ -199,6 +199,11 @@ class ReceiveReportView(APIView):
             reverse("get-mechanic-report"), service_request.id
         )
         report_link = request.build_absolute_uri(report_link)
+        log_security_event(
+            "REPORT_SUBMITTED",
+            report_details.get("mechanic_code", "unknown"),
+            {"vin": report_details.get("vin"), "service_request_id": service_request.id},
+        )
         return Response(
             {"id": service_request.id, "sent": True, "report_link": report_link},
             status=status.HTTP_200_OK,
@@ -241,6 +246,11 @@ class GetReportView(APIView):
         serializer = MechanicServiceRequestSerializer(service_request)
         response_data = dict(serializer.data)
         service_report_pdf(response_data, report_id)
+        log_security_event(
+            "REPORT_ACCESSED",
+            user.id,
+            {"report_id": report_id},
+        )
         return Response(response_data, status=status.HTTP_200_OK)
 
 

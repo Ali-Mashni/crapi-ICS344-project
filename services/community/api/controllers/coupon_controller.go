@@ -23,6 +23,7 @@ import (
 
 	"crapi.proj/goservice/api/models"
 	"crapi.proj/goservice/api/responses"
+	"crapi.proj/goservice/api/utils"
 	"go.mongodb.org/mongo-driver/bson"
 )
 
@@ -98,5 +99,8 @@ func (s *Server) ValidateCoupon(w http.ResponseWriter, r *http.Request) {
 		responses.JSON(w, http.StatusInternalServerError, err)
 		return
 	}
+	utils.LogSecurityEvent("COUPON_VALIDATED", utils.GetEmailFromRequest(r), "INFO", map[string]interface{}{
+		"coupon_code": bsonMap["coupon_code"],
+	})
 	responses.JSON(w, http.StatusOK, couponData)
 }

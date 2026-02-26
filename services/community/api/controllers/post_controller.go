@@ -23,6 +23,7 @@ import (
 
 	"crapi.proj/goservice/api/models"
 	"crapi.proj/goservice/api/responses"
+	"crapi.proj/goservice/api/utils"
 	"github.com/gorilla/mux"
 )
 
@@ -56,6 +57,9 @@ func (s *Server) AddNewPost(w http.ResponseWriter, r *http.Request) {
 		responses.ERROR(w, http.StatusInternalServerError, err)
 	}
 
+	utils.LogSecurityEvent("POST_CREATED", post.Author.Email, "INFO", map[string]interface{}{
+		"post_title": post.Title,
+	})
 	responses.JSON(w, http.StatusOK, savedPost)
 }
 
@@ -107,6 +111,10 @@ func (s *Server) GetPost(w http.ResponseWriter, r *http.Request) {
 		responses.ERROR(w, http.StatusInternalServerError, err)
 		return
 	}
+	utils.LogSecurityEvent("POSTS_LISTED", utils.GetEmailFromRequest(r), "INFO", map[string]interface{}{
+		"offset": offset,
+		"limit":  limit,
+	})
 	responses.JSON(w, http.StatusOK, posts)
 }
 
@@ -144,5 +152,8 @@ func (s *Server) Comment(w http.ResponseWriter, r *http.Request) {
 		responses.ERROR(w, http.StatusInternalServerError, er)
 		return
 	}
+	utils.LogSecurityEvent("COMMENT_ADDED", comment.Author.Email, "INFO", map[string]interface{}{
+		"post_id": vars["postID"],
+	})
 	responses.JSON(w, http.StatusOK, postData)
 }

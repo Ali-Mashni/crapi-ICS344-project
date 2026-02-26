@@ -22,9 +22,13 @@ import com.crapi.model.VehicleLocationResponse;
 import com.crapi.model.VehicleOwnership;
 import com.crapi.service.VehicleOwnershipService;
 import com.crapi.service.VehicleService;
+import com.crapi.service.UserService;
+import com.crapi.utils.SecurityLogger;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -39,6 +43,8 @@ public class VehicleController {
   @Autowired VehicleService vehicleService;
 
   @Autowired VehicleOwnershipService vehicleOwnershipService;
+
+  @Autowired UserService userService;
 
   /**
    * @param request
@@ -62,6 +68,14 @@ public class VehicleController {
       @Valid @RequestBody VehicleForm vehicleDetails, HttpServletRequest request) {
     CRAPIResponse checkVehicleResponse = vehicleService.checkVehicle(vehicleDetails, request);
     if (checkVehicleResponse != null && checkVehicleResponse.getStatus() == 200) {
+      Map<String, Object> details = new HashMap<>();
+      details.put("pincode", vehicleDetails.getPincode());
+      String userEmail = "";
+      try {
+        userEmail = userService.getUserFromToken(request).getEmail();
+      } catch (Exception ignored) {
+      }
+      SecurityLogger.logEvent("VEHICLE_REGISTERED", userEmail, details, "INFO");
       return ResponseEntity.status(HttpStatus.OK).body(checkVehicleResponse);
     }
     return ResponseEntity.status(HttpStatus.FORBIDDEN).body(checkVehicleResponse);
@@ -119,10 +133,20 @@ public class VehicleController {
    * @return VehicleDetails on given car_id.
    */
   @GetMapping("/vehicle/{carId}/location")
-  public ResponseEntity<?> getLocationBOLA(@PathVariable("carId") UUID carId) {
+  public ResponseEntity<?> getLocationBOLA(
+      @PathVariable("carId") UUID carId, HttpServletRequest request) {
     VehicleLocationResponse vehicleDetails = vehicleService.getVehicleLocation(carId);
-    if (vehicleDetails != null) return ResponseEntity.ok().body(vehicleDetails);
-    else
+    if (vehicleDetails != null) {
+      Map<String, Object> details = new HashMap<>();
+      details.put("car_id", carId.toString());
+      String userEmail = "";
+      try {
+        userEmail = userService.getUserFromTokenWithoutValidation(request).getEmail();
+      } catch (Exception ignored) {
+      }
+      SecurityLogger.logEvent("VEHICLE_LOCATION_ACCESSED", userEmail, details, "INFO");
+      return ResponseEntity.ok().body(vehicleDetails);
+    } else
       return ResponseEntity.status(HttpStatus.NOT_FOUND)
           .body(new CRAPIResponse(UserMessage.DID_NOT_GET_VEHICLE_FOR_USER));
   }

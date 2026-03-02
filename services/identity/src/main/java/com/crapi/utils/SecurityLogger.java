@@ -23,28 +23,28 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class SecurityLogger {
-    private static final String LOG_PATH = "/var/log/crapi/identity_security.jsonl";
-    private static final Gson gson = new Gson();
+  private static final String LOG_PATH = "/var/log/crapi/identity_security.jsonl";
+  private static final Gson gson = new Gson();
 
-    public static void logEvent(
-            String eventName, String userEmail, Map<String, Object> details, String severity) {
-        try {
-            File dir = new File("/var/log/crapi");
-            if (!dir.exists()) dir.mkdirs();
+  public static void logEvent(
+      String eventName, String userEmail, Map<String, Object> details, String severity) {
+    try {
+      File dir = new File("/var/log/crapi");
+      if (!dir.exists()) dir.mkdirs();
 
-            Map<String, Object> logEntry = new HashMap<>();
-            logEntry.put("timestamp", Instant.now().toString());
-            logEntry.put("service", "crapi-identity");
-            logEntry.put("severity", severity);
-            logEntry.put("event_name", eventName);
-            logEntry.put("user_email", userEmail);
-            logEntry.put("details", details);
+      Map<String, Object> logEntry = new HashMap<>();
+      logEntry.put("timestamp", Instant.now().toString());
+      logEntry.put("service", "crapi-identity");
+      logEntry.put("severity", severity);
+      logEntry.put("event_name", eventName);
+      logEntry.put("user_email", userEmail);
+      logEntry.put("details", details);
 
-            FileWriter fw = new FileWriter(LOG_PATH, true);
-            fw.write(gson.toJson(logEntry) + "\n");
-            fw.close();
-        } catch (IOException e) {
-            System.err.println("Failed to write security log: " + e.getMessage());
-        }
+      try (FileWriter fw = new FileWriter(LOG_PATH, true)) {
+        fw.write(gson.toJson(logEntry) + "\n");
+      }
+    } catch (IOException e) {
+      System.err.println("Failed to write security log: " + e.getMessage());
     }
+  }
 }

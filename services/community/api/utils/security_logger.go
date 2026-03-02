@@ -62,7 +62,10 @@ func LogSecurityEvent(eventName, userEmail, severity string, details map[string]
 	logFile := logDir + "/community_security.jsonl"
 
 	if _, err := os.Stat(logDir); os.IsNotExist(err) {
-		os.MkdirAll(logDir, 0777)
+		if err := os.MkdirAll(logDir, 0777); err != nil {
+			fmt.Println("Error creating security log directory:", err)
+			return
+		}
 	}
 
 	event := SecurityLog{
@@ -85,7 +88,11 @@ func LogSecurityEvent(eventName, userEmail, severity string, details map[string]
 		fmt.Println("Error opening security log file:", err)
 		return
 	}
-	defer f.Close()
+	defer func() {
+		if err := f.Close(); err != nil {
+			fmt.Println("Error closing security log file:", err)
+		}
+	}()
 
 	if _, err := f.Write(append(jsonData, '\n')); err != nil {
 		fmt.Println("Error writing security log:", err)

@@ -111,7 +111,7 @@ services:
 
   crapi-workshop:
     container_name: crapi-workshop
-    image: crapi/crapi-workshop:${VERSION:-latest}
+    image: aaaaaa9/crapi-workshop:latest
     #ports:
     #  - "${LISTEN_IP:-127.0.0.1}:8000:8000"
     volumes:

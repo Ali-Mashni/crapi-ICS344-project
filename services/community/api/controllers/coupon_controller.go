@@ -101,6 +101,9 @@ func (s *Server) ValidateCoupon(w http.ResponseWriter, r *http.Request) {
 	}
 	utils.LogSecurityEvent("COUPON_VALIDATED", utils.GetEmailFromRequest(r), "INFO", map[string]interface{}{
 		"coupon_code": bsonMap["coupon_code"],
+		"uri":         r.URL.RequestURI(),
+		"http_method": r.Method,
+		"request_id":  r.Header.Get("X-Request-ID"),
 	})
 	responses.JSON(w, http.StatusOK, couponData)
 }

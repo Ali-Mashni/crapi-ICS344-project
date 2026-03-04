@@ -18,6 +18,14 @@ import os
 from datetime import datetime
 
 
+def get_request_id(request):
+    """
+    Returns the value of the X-Request-ID header from the HTTP request,
+    or an empty string if the header is absent.
+    """
+    return request.META.get("HTTP_X_REQUEST_ID", "")
+
+
 def log_error(url, params, status_code, message):
     """
     :param url: The URL of the request API.

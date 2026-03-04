@@ -14,7 +14,7 @@ services:
 
   crapi-identity:
     container_name: crapi-identity
-    image: crapi/crapi-identity:${VERSION:-latest}
+    image: aaaaaa9/crapi-identity:latest
     # ports:
     #  - "${LISTEN_IP:-127.0.0.1}:8080:8080"
     volumes:
@@ -69,7 +69,7 @@ services:
 
   crapi-community:
     container_name: crapi-community
-    image: crapi/crapi-community:${VERSION:-latest}
+    image: aaaaaa9/crapi-community:latest
     #ports:
     #  - "${LISTEN_IP:-127.0.0.1}:8087:8087"
     volumes:

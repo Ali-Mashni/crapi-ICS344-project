@@ -33,7 +33,7 @@ By completing this project, students will gain practical experience with:
 
 Students must complete this project using a **Kali Linux VM**.
 
-Full environment setup instructions are provided in the setup guide included in this repository (see `Setup.md`). Students must complete the setup guide before beginning the project tasks.
+Full environment setup instructions are provided in the setup guide included in this repository (see [Setup.md](Setup.md)). Students must complete the setup guide before beginning the project tasks.
 
 The setup includes:
 
@@ -44,7 +44,7 @@ The setup includes:
 ## Phase 1 - Setup and Reconnaissance (10 pts)
 
 Students must deploy the environment and analyze the API before attempting exploitation.
-After setting up crAPI, it is recommended to follow the intended user workflow in `docs/happy-path.md` to understand how the application is supposed to work before attempting any security challenges.
+After setting up crAPI, it is recommended to follow the intended user workflow in [docs/happy-path.md](docs/happy-path.md) to understand how the application is supposed to work before perfoming any task.
 
 ### Tasks
 

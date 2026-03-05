@@ -44,6 +44,7 @@ The setup includes:
 ## Phase 1 - Setup and Reconnaissance (10 pts)
 
 Students must deploy the environment and analyze the API before attempting exploitation.
+After setting up crAPI, it is recommended to follow the intended user workflow in `docs/happy-path.md` to understand how the application is supposed to work before attempting any security challenges.
 
 ### Tasks
 

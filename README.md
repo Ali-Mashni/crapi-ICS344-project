@@ -16,9 +16,8 @@ The project focuses on vulnerabilities aligned with the **OWASP API Security Top
 
 - `API1:2023` Broken Object Level Authorization
 - `API2:2023` Broken Authentication
-- `API3:2023` Broken Object Property Level Authorization
-- `API4:2023` Unrestricted Resource Consumption
 - `API5:2023` Broken Function Level Authorization
+- `API7:2023` Server Side Request Forgery
 - `API8:2023` Security Misconfiguration / Injection
 
 By completing this project, students will gain practical experience with:
@@ -44,7 +43,7 @@ The setup includes:
 ## Phase 1 - Setup and Reconnaissance (10 pts)
 
 Students must deploy the environment and analyze the API before attempting exploitation.
-After setting up crAPI, it is recommended to follow the intended user workflow in [docs/happy-path.md](docs/happy-path.md) to understand how the application is supposed to work before perfoming any task.
+After setting up crAPI, it is recommended to follow the intended user workflow in [docs/happy-path.md](docs/happy-path.md) to understand how the application is supposed to work before performing any task.
 
 ### Tasks
 
@@ -82,6 +81,7 @@ Attack work may involve techniques such as:
 - Testing authorization boundaries
 - Manipulating authentication tokens
 - Sending repeated requests
+- Testing URL or host parameters for backend fetch behavior (SSRF)
 - Experimenting with request payloads
 
 ### Required Attacks
@@ -100,11 +100,11 @@ Students manipulate request parameters or hidden fields to gain unintended advan
 4. **NoSQL Injection**
 Students exploit improper input validation in a database query.
 
-5. **Broken Authentication (JWT Manipulation)**
-Students manipulate authentication tokens to access restricted resources.
+5. **Server-Side Request Forgery (SSRF)**
+Students make a request to another site through the application to demonstrate SSRF behavior.
 
-6. **Unrestricted Resource Consumption (OTP Brute Force)**
-Students exploit lack of rate limiting through repeated authentication attempts.
+6. **Broken Authentication (JWT Manipulation)**
+Students manipulate authentication tokens to access restricted resources.
 
 ### Required Evidence
 
@@ -141,6 +141,7 @@ Queries should detect suspicious patterns such as:
 - Abnormal request patterns
 - Authentication anomalies
 - Excessive request rates
+- SSRF indicators (for example, URL/IP targets in request parameters or unusual outbound destinations or large durations of getting the response)
 
 
 2. **Splunk Dashboard**

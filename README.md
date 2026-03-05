@@ -174,93 +174,20 @@ Students must provide:
 - A screenshot of the alert configuration
 - A screenshot showing the alert in Triggered Alerts
 
-## Grading Rubric (100 points)
+## Grading Rubric (100 Points)
 
-Grading emphasizes clear visual evidence through screenshots.
+Project grading will follow the Excel rubric provided on Blackboard.
 
-### Phase 1 - Setup and Recon (10 pts)
+Students should review the Excel rubric carefully, as it contains the detailed grading criteria used by instructors and graders.
 
-| Score | Criteria |
-| --- | --- |
-| 9-10 | Complete environment setup with clear screenshots. Proxy traffic captured. Multiple API endpoints identified. |
-| 7-8 | Setup mostly correct with minor missing evidence. |
-| 5-6 | Environment working but limited reconnaissance evidence. |
-| 3-4 | Partial setup or minimal screenshots. |
-| 0-2 | Setup not demonstrated. |
+**Evaluation places strong emphasis on clear visual evidence through screenshots.** Screenshots should demonstrate:
 
-### Report Quality and Professionalism (15 pts)
+- Tools used (e.g., proxy tools, browser developer tools, etc.)
+- HTTP requests and responses
+- Successful exploitation of vulnerabilities
+- Log analysis and detection results
 
-| Score | Criteria |
-| --- | --- |
-| 13-15 | Report is well organized, professional, and easy to follow. Screenshots are clear and well referenced. |
-| 10-12 | Good structure, but explanations or formatting need improvement. |
-| 7-9 | Basic structure with unclear sections or weak explanations. |
-| 4-6 | Disorganized report with minimal explanations. |
-| 0-3 | Report incomplete or extremely unclear. |
-
-### Phase 2 - Attacks (40 pts)
-
-| Score | Criteria |
-| --- | --- |
-| 36-40 | All attacks successfully demonstrated with strong evidence and clear explanations. |
-| 30-35 | Most attacks demonstrated with adequate evidence. |
-| 20-29 | Some attacks demonstrated but missing clear proof. |
-| 10-19 | Limited attack demonstrations. |
-| 0-9 | Very little evidence of exploitation. |
-
-Screenshots should clearly show request/interaction, evidence of exploitation, and resulting system behavior.
-
-### Phase 3 - Detection (35 pts)
-
-| Component | Points |
-| --- | --- |
-| Detection Queries | 20 |
-| Dashboard | 10 |
-| Alert | 5 |
-
-#### Detection Queries (20 pts)
-
-| Score | Criteria |
-| --- | --- |
-| 18-20 | Strong SPL queries that effectively detect attack patterns. |
-| 14-17 | Functional queries with limited detection logic. |
-| 8-13 | Queries return logs but lack meaningful analysis. |
-| 1-7 | Weak queries or unclear results. |
-| 0 | No detections implemented. |
-
-Students who only display logs without meaningful detection logic will receive lower scores.
-
-#### Dashboard (10 pts)
-
-| Score | Criteria |
-| --- | --- |
-| 9-10 | Complete dashboard with four meaningful monitoring panels. |
-| 7-8 | Dashboard functional but explanation limited. |
-| 4-6 | Dashboard partially implemented. |
-| 1-3 | Minimal visualization. |
-| 0 | No dashboard provided. |
-
-#### Alert (5 pts)
-
-| Score | Criteria |
-| --- | --- |
-| 5 | Alert correctly configured and demonstrated triggering. |
-| 3-4 | Alert configured but triggering not clearly shown. |
-| 1-2 | Partial configuration. |
-| 0 | No alert implemented. |
-
-## Important Note on Evidence
-
-Screenshots are essential.
-
-Students should include clear screenshots showing:
-
-- Tools used
-- Requests sent
-- System responses
-- Log analysis results
-
-Projects lacking sufficient evidence may receive significantly lower grades.
+> **⚠️ Important:** Reports lacking sufficient visual evidence may receive significantly lower grades even if explanations are provided.
 
 ## Academic Integrity and Ethics
 
@@ -270,7 +197,7 @@ Projects lacking sufficient evidence may receive significantly lower grades.
 
 ## License and Attribution
 
-This lab is based on the **OWASP crAPI** project.
+This project is based on the **OWASP crAPI** project.
 
 Copyright (c) 2021 OWASP Foundation.
 Licensed under the **Apache License 2.0**.

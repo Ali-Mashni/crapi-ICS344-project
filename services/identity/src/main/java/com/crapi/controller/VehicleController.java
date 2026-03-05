@@ -70,6 +70,9 @@ public class VehicleController {
     if (checkVehicleResponse != null && checkVehicleResponse.getStatus() == 200) {
       Map<String, Object> details = new HashMap<>();
       details.put("pincode", vehicleDetails.getPincode());
+      details.put("uri", request.getRequestURI());
+      details.put("http_method", request.getMethod());
+      details.put("request_id", SecurityLogger.getOrGenerateRequestId(request));
       String userEmail = "";
       try {
         userEmail = userService.getUserFromToken(request).getEmail();
@@ -138,7 +141,10 @@ public class VehicleController {
     VehicleLocationResponse vehicleDetails = vehicleService.getVehicleLocation(carId);
     if (vehicleDetails != null) {
       Map<String, Object> details = new HashMap<>();
-      details.put("car_id", carId.toString());
+      details.put("vehicle_id", carId.toString());
+      details.put("uri", request.getRequestURI());
+      details.put("http_method", request.getMethod());
+      details.put("request_id", SecurityLogger.getOrGenerateRequestId(request));
       String userEmail = "";
       try {
         userEmail = userService.getUserFromTokenWithoutValidation(request).getEmail();

@@ -38,7 +38,7 @@ from utils.jwt import jwt_auth_required
 from utils import messages
 from crapi.shop.models import Order, Product, AppliedCoupon, Coupon
 from crapi.user.models import UserDetails
-from utils.logging import log_error, log_security_event
+from utils.logging import log_error, log_security_event, get_request_id
 from django.core.exceptions import ObjectDoesNotExist
 from rest_framework.pagination import LimitOffsetPagination
 
@@ -209,7 +209,14 @@ class OrderControlView(APIView):
         log_security_event(
             "PRODUCT_PURCHASED",
             user.id,
-            {"product_id": request_data["product_id"], "quantity": request_data["quantity"], "order_id": order.id},
+            {
+                "product_id": request_data["product_id"],
+                "quantity": request_data["quantity"],
+                "order_id": order.id,
+                "uri": request.path,
+                "http_method": request.method,
+                "request_id": get_request_id(request),
+            },
         )
         return Response(
             {
@@ -339,7 +346,12 @@ class ReturnOrder(APIView):
         log_security_event(
             "PRODUCT_RETURNED",
             user.id,
-            {"order_id": order.id},
+            {
+                "order_id": order.id,
+                "uri": request.path,
+                "http_method": request.method,
+                "request_id": get_request_id(request),
+            },
         )
         return Response(
             {
@@ -434,6 +446,17 @@ class ApplyCouponView(APIView):
         user_details = UserDetails.objects.get(user=user)
         user_details.available_credit += coupon_request_body["amount"]
         user_details.save()
+        log_security_event(
+            "COUPON_APPLIED",
+            user.id,
+            {
+                "coupon_code": coupon_request_body["coupon_code"],
+                "amount": coupon_request_body["amount"],
+                "uri": request.path,
+                "http_method": request.method,
+                "request_id": get_request_id(request),
+            },
+        )
         return Response(
             {
                 "credit": user_details.available_credit,

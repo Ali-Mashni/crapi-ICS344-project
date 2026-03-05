@@ -15,16 +15,30 @@
 package com.crapi.utils;
 
 import com.google.gson.Gson;
+import jakarta.servlet.http.HttpServletRequest;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.time.Instant;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.UUID;
 
 public class SecurityLogger {
   private static final String LOG_PATH = "/var/log/crapi/identity_security.jsonl";
   private static final Gson gson = new Gson();
+
+  /**
+   * Returns the value of the {@code X-Request-ID} request header, or a freshly generated UUID if
+   * the header is absent or blank.
+   */
+  public static String getOrGenerateRequestId(HttpServletRequest request) {
+    String requestId = request.getHeader("X-Request-ID");
+    if (requestId == null || requestId.isEmpty()) {
+      requestId = UUID.randomUUID().toString();
+    }
+    return requestId;
+  }
 
   public static void logEvent(
       String eventName, String userEmail, Map<String, Object> details, String severity) {

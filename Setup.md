@@ -14,7 +14,7 @@
 
 ### Minimum
 - Kali Linux
-- 6GB RAM minimum (>=8GB recommended)
+- 6GB RAM minimum (Greater than or equal to 8GB is recommended)
 - 10–15GB free disk space
 
 ### Required Software

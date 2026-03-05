@@ -9,14 +9,7 @@ This document explains the **happy path** — the normal, intended workflow — 
 - Navigate APIs with confidence
 - Clearly differentiate expected behavior vs vulnerabilities
 
----
 
-## Prerequisites
-Before following this guide, ensure:
-- crAPI is running locally using Docker
-- You can access:
-  - Swagger UI (OpenAPI)
-  - Postman collection (optional but recommended)
 
 ---
 
@@ -119,6 +112,6 @@ This guide should be followed **before attempting any challenges or exploitation
 ## Next Steps
 Once the happy path is clear, users can proceed to:
 - `docs/challenges.md`
-- `docs/challengeSolutions.md`
+
 
 to explore vulnerabilities intentionally built into crAPI.

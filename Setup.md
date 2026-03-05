@@ -14,7 +14,7 @@
 
 ### Minimum
 - Kali Linux
-- 6GB RAM minimum (8GB recommended)
+- 6GB RAM minimum (>=8GB recommended)
 - 10–15GB free disk space
 
 ### Required Software
@@ -58,13 +58,12 @@ docker-compose version
 mkdir -p ~/crapi
 cd ~/crapi
 ```
-
 ---
 
 ## 3) Download crAPI Docker Compose File
 
 ```bash
-curl -L -o docker-compose.yml https://raw.githubusercontent.com/Ali-Mashni/crapi-ICS344-project/copilot/implement-json-security-logging/deploy/docker/docker-compose.yml
+curl -L -o docker-compose.yml https://raw.githubusercontent.com/Ali-Mashni/crapi-ICS344-project/integrate-app-logs-splunk/deploy/docker/docker-compose.yml
 docker-compose pull
 ```
 
@@ -89,7 +88,8 @@ You should see services such as:
 ### 4.1 Create Required Folders
 
 ```bash
-mkdir -p reverse-proxy logs/nginx
+mkdir -p reverse-proxy logs/nginx logs/app
+touch logs/app/identity_security.jsonl logs/app/community_security.jsonl logs/app/workshop_security.jsonl
 ```
 
 ### 4.2 Create Nginx Configuration
@@ -101,39 +101,48 @@ cat > reverse-proxy/nginx.conf <<'EOF'
 events {}
 
 http {
+    # Allow uploads up to 15MB (crAPI UI max is 10MB)
+    client_max_body_size 15m;
 
-  # Allow uploads up to 15MB (crAPI UI max is 10MB)
-  client_max_body_size 15m;
+    log_format json_combined escape=json
+      '{'
+        '"time":"$time_iso8601",'
+        '"request_id":"$request_id",'
+        '"remote_addr":"$remote_addr",'
+        '"real_ip":"$http_x_real_ip",'
+        '"method":"$request_method",'
+        '"uri":"$request_uri",'
+        '"status":$status,'
+        '"bytes_sent":$bytes_sent,'
+        '"duration":"$request_time",'
+        '"auth":"$http_authorization",'
+        '"referer":"$http_referer",'
+        '"user_agent":"$http_user_agent"'
+      '}';
 
-  # JSON log format (for Splunk ingestion)
-  log_format json_combined escape=json
-    '{'
-      '"time":"$time_iso8601",'
-      '"remote_addr":"$remote_addr",'
-      '"method":"$request_method",'
-      '"uri":"$request_uri",'
-      '"status":$status,'
-      '"bytes_sent":$bytes_sent,'
-      '"duration":"$request_time",'
-      '"auth":"$http_authorization",'
-      '"referer":"$http_referer",'
-      '"user_agent":"$http_user_agent"'
-    '}';
+    access_log /var/log/nginx/access.json json_combined;
 
-  access_log /var/log/nginx/access.json json_combined;
+    server {
+        listen 80;
 
-  server {
-    listen 80;
 
-    location / {
-      proxy_pass http://crapi-web:80;
+        add_header X-Request-ID $request_id;
 
-      proxy_set_header Host $host;
-      proxy_set_header X-Real-IP $remote_addr;
-      proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-      proxy_set_header X-Forwarded-Proto $scheme;
+        location / {
+            proxy_pass http://crapi-web:80;
+
+            
+            proxy_set_header X-Request-ID $request_id;
+
+            proxy_set_header Host $host;
+            proxy_set_header X-Real-IP $remote_addr;
+            proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+            proxy_set_header X-Forwarded-Proto $scheme;
+    
+            proxy_set_header Authorization $http_authorization;
+            proxy_pass_header Authorization;
+        }
     }
-  }
 }
 EOF
 ```
@@ -246,65 +255,61 @@ If the file is empty, you are likely browsing `:8888` instead of `:8080`.
 
 **Add Log File to Splunk**
 
-1. Go to **Settings** → **Add Data**
-2. Choose **Monitor**
-3. Choose **Files & Directories**
-4. Enter path:
+1. Go to **Settings** → **Add Data** → **Monitor**.
+2. Add Nginx access log first:
 
 ```bash
 /data/nginx/access.json
 ```
 
-5. Create new index:
+3. Create/select index:
 
 ```bash
 nginx
 ```
 
-6. Choose source type:
+4. Choose source type:
 
 ```bash
 _json
 ```
 
-7. Finish setup.
+5. Finish setup for `access.json`.
 
----
-
-## 10) Confirm Splunk Is Receiving Logs
-
-In Splunk Search:
+6. Add `identity` app log:
 
 ```bash
-index=nginx
-| head 20
+/data/app/identity_security.jsonl
 ```
 
-Then:
+7. On **Set Source Type** for `identity`:
+  - Initially choose source type:
 
 ```bash
-index=nginx
-| stats count by method, status
+_json
 ```
 
-If events appear, setup is complete.
+  - Click **Save As** and set:
+    - **Name:** `json-2` (or `crapi_json`)
 
----
+8. In the **Timestamp** tab (identity), set:
+  - **Extraction:** `Advanced`
+  - **Timestamp format:** `%Y-%m-%dT%H:%M:%S.%NZ`
+  - **Timestamp fields:** `timestamp`
 
-## 11) Generate Test Traffic
-
-### Enumeration Example
+9. Choose an index for app logs (example):
 
 ```bash
-for i in $(seq 1 30); do
-  curl -s -o /dev/null "http://127.0.0.1:8080/api/v2/vehicle/$i"
-done
+app
+
 ```
 
-**Splunk detection query:**
+10. Add `community` and `workshop` app logs (repeat **Add Data** → **Monitor**):
 
 ```bash
-index=nginx uri="/api/v2/vehicle/*"
-| stats count as hits, dc(uri) as unique_uris by remote_addr
-| sort -hits
+/data/app/community_security.jsonl
+/data/app/workshop_security.jsonl
 ```
+
+11. For `community` and `workshop` source type, use `_json` and keep timestamp extraction as **Automatic** (no custom timestamp format unless needed).
+

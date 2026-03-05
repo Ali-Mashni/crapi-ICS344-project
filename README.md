@@ -16,6 +16,7 @@ The project focuses on vulnerabilities aligned with the **OWASP API Security Top
 
 - `API1:2023` Broken Object Level Authorization
 - `API2:2023` Broken Authentication
+- `API3:2023` Broken Object Property Level Authorization
 - `API5:2023` Broken Function Level Authorization
 - `API7:2023` Server Side Request Forgery
 - `API8:2023` Security Misconfiguration / Injection

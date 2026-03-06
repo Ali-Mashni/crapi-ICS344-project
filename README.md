@@ -1,74 +1,219 @@
-# ICS 344 Course Project — API Security & Monitoring
+# ICS 344 Course Project - API Security and Monitoring
 
-This repository is the official course project package for **ICS 344 (Information Security)**. 
+This repository is the official course project package for **ICS 344 (Information Security)**.
 
-The project is based on **crAPI (Completely Ridiculous API)** — an intentionally vulnerable platform designed to teach real-world API security failures. Students will perform structured reconnaissance, identify and exploit vulnerabilities, and analyze attack evidence using log correlation and SIEM tools.
+The project is based on **crAPI (Completely Ridiculous API)**, an intentionally vulnerable platform used to teach practical API security testing and defensive monitoring.
 
----
+## Project Overview
 
-## 1) Project Context & Purpose
+Modern web applications increasingly rely on APIs and microservices to provide functionality. While APIs enable flexible system architectures, they also introduce new security risks when authentication, authorization, and input validation are not implemented correctly.
 
-Modern systems increasingly rely on **APIs and microservices** instead of traditional monolithic web apps. This project is designed to build practical skills in:
+In this project, students will analyze and exploit vulnerabilities in crAPI and then detect those attacks using log analysis in Splunk.
 
-- **Web Security:** Identifying authorization bypasses, injection, and logic flaws.
-- **Access Control:** Auditing authentication methods and authorization models.
-- **Monitoring & Detection:** Connecting offensive activity with defensive evidence.
+Students will learn how attackers interact with APIs and how defenders detect malicious activity through monitoring systems.
 
----
+The project focuses on vulnerabilities aligned with the **OWASP API Security Top 10 (2023)**, including:
 
-## 2) Project Structure & Objectives
+- `API1:2023` Broken Object Level Authorization
+- `API2:2023` Broken Authentication
+- `API3:2023` Broken Object Property Level Authorization
+- `API5:2023` Broken Function Level Authorization
+- `API7:2023` Server Side Request Forgery
+- `API8:2023` Security Misconfiguration / Injection
 
-Each group will complete three distinct phases:
+By completing this project, students will gain practical experience with:
 
-### Phase 1 — Setup & Reconnaissance
-- Deploy the lab environment and map the API surface.
-- **The "Happy Path":** Before attacking, you **must** follow the intended user workflow to understand normal behavior. This is critical for distinguishing between "Normal" and "Malicious" traffic in later phases. Refer to `docs/happy-path.md`.
+- API reconnaissance and traffic analysis
+- Exploiting real-world API vulnerabilities
+- Understanding how attacks appear in logs
+- Writing Splunk detection queries
+- Building monitoring dashboards and alerts
 
-### Phase 2 — Vulnerability Discovery & Exploitation
-You must successfully exploit **six (6) unique vulnerabilities**:
-- **Mandatory (3):** 
-    - Challenge 1: BOLA (Vehicle Location Leak)
-    - Challenge 7: BFLA (Unauthorized Administrative Action)
-    - Challenge 8: Mass Assignment (Business Logic/Quantity Abuse)
-- **Elective (3):** Choose any three additional challenges from the platform (e.g., JWT, SQLi, or Prompt Injection).
+## Environment Requirements
 
-### Phase 3 — Logging & Detection
-- Ingest traffic logs into a SIEM of your choice.
-- Create searches to detect your specific attack patterns.
-- Provide "Proof of Detection" (Indicators of Compromise) for your exploits.
+Students must complete this project using a **Kali Linux VM**.
 
----
+Full environment setup instructions are provided in the setup guide included in this repository (see [Setup.md](Setup.md)). Students must complete the setup guide before beginning the project tasks.
 
-## 3) Deployment Guidelines
+The setup includes:
 
-### Baseline Setup
-This repository contains a Docker-based deployment. While you are free to deploy the environment in the way that best suits your team, you must satisfy these constraints:
-- The application must run locally (Docker is recommended).
-- All communication should be captured and logged for analysis.
+- The crAPI microservices application
+- A reverse proxy logging layer
+- A Splunk monitoring environment
 
-### Important Note on Networking
-If you choose to integrate a reverse proxy (like Nginx) or a SIEM tool (like Splunk or ELK), you may need to modify the default port mappings in `docker-compose.yml`. Ensure your proxy is correctly routing traffic to the internal services.
+## Phase 1 - Setup and Reconnaissance (10 pts)
+
+Students must deploy the environment and analyze the API before attempting exploitation.
+After setting up crAPI, it is recommended to follow the intended user workflow in [docs/happy-path.md](docs/happy-path.md) to understand how the application is supposed to work before performing any task.
+
+### Tasks
+
+Students must:
+
+- Follow the setup guide in the repository
+- Verify all containers are running successfully
+- Access the application through the browser
+- Explore application features
+- Use a proxy tool such as OWASP ZAP or Burp Suite
+- Observe API requests generated by the application
+- Identify the main API endpoints used by the system
+
+Students should demonstrate they understand how the application communicates with backend APIs.
+
+### Required Evidence
+
+Students must provide screenshots showing:
+
+- Successful deployment of the environment
+- Application access in the browser
+- Captured proxy traffic
+- Discovered API endpoints
+
+The goal of this phase is to demonstrate core API reconnaissance skills.
+
+## Phase 2 - API Vulnerability Exploitation (40 pts)
+
+Students must exploit **six vulnerabilities** present in the application.
+
+Attack work may involve techniques such as:
+
+- Modifying request parameters
+- Intercepting and altering requests
+- Testing authorization boundaries
+- Manipulating authentication tokens
+- Sending repeated requests
+- Testing URL or host parameters for backend fetch behavior (SSRF)
+- Experimenting with request payloads
+
+### Required Attacks
+
+Students must successfully demonstrate the following:
+
+1. **Broken Object Level Authorization (BOLA)**
+   Students access resources belonging to another user by manipulating object identifiers.
+   
+   **Objective:** Find an endpoint that returns user data and modify the ID to successfully retrieve sensitive information (such as vehicle data/location) belonging to a different user.
+
+2. **Broken Function Level Authorization (BFLA)**
+   Students discover and access functionality intended only for privileged users.
+   
+   **Objective:** Discover a hidden administrative endpoint and use it to perform an unauthorized destructive action against another user's data.
+
+3. **Mass Assignment / Business Logic Flaw**
+   Students manipulate request parameters or hidden fields to gain unintended advantages.
+   
+   **Objective:** Intercept an API request and inject/modify hidden JSON properties to bypass business logic (e.g., completing a transaction or acquiring an item without paying the required balance).
+
+4. **NoSQL Injection**
+   Students exploit improper input validation in a database query.
+   
+   **Objective:** Bypass a database validation check by injecting NoSQL operators into the request payload instead of providing a valid string.
+
+5. **Server-Side Request Forgery (SSRF)**
+   Students make a request to another site through the application to demonstrate SSRF behavior.
+   
+   **Objective:** Identify a feature that passes routing or URL parameters to the backend, and manipulate it to make the server fetch and return the content of an arbitrary external webpage (like google.com).
+
+6. **Broken Authentication (JWT Manipulation)**
+   Students manipulate authentication tokens to access restricted resources.
+   
+   **Objective:** Tamper with the payload or signature of your JSON Web Token (JWT) to elevate your privileges or impersonate another user without knowing their credentials.
+
+### Required Evidence
+
+For each attack, students must provide:
+
+- Screenshots showing the attack process
+- Evidence of successful exploitation
+- A brief explanation of the vulnerability
+
+Evidence should clearly show attack method and impact.
+
+## Phase 3 - Detection and Monitoring (35 pts)
+
+Students must analyze the attacks using Splunk.
+
+The goal is to understand how malicious activity can be detected through log analysis and monitoring systems.
+
+### Required Deliverables
+
+Students must produce the following detection components.
+
+1. **Detection Queries**
+Students must write at least four SPL detection queries.
+
+Each detection must include:
+
+- The SPL query
+- A screenshot of the search results
+- A brief explanation of the query and a brief explanation of the attack behavior being detected
+
+Queries should detect suspicious patterns such as:
+
+- Enumeration behavior
+- Abnormal request patterns
+- Authentication anomalies
+- Excessive request rates
+- SSRF indicators (for example, URL/IP targets in request parameters or unusual outbound destinations or large durations of getting the response)
 
 
+2. **Splunk Dashboard**
+Students must create **one dashboard with at least four distinct panels** that visualize the attacks performed during the Red Team phase. 
 
+Each panel should visualize suspicious activity or security-relevant patterns, such as:
+- Unusual spikes in response sizes (`bytes_sent`) indicating data exfiltration or SSRF.
+- Unauthorized or anomalous access attempts to administrative endpoints (BFLA).
+- High enumeration rates (e.g., one user rapidly accessing many different resource IDs) indicating BOLA.
+- Spikes in HTTP 4xx or 5xx error codes corresponding to fuzzing or injection attempts.
 
----
+**Tips for a Realistic SOC Dashboard:**
+*   **Generate Baseline Traffic:** A security dashboard isn't very useful if it only shows your attacks! To make your dashboard look like a real enterprise environment, generate "normal" background traffic (regular logins, viewing dashboards, buying items) so your attacks stand out as clear anomalies against the baseline.
+*   **Simulate Multiple IPs:** In the real world, traffic comes from many different sources. You can simulate this by generating traffic from both your Windows host machine and your Kali VM. 
+*   **The "Admin" Anomaly (Hint):** Think about how a SOC detects an unauthorized user in an admin portal. Try generating baseline "normal" traffic to the admin endpoints from one specific IP address (representing the company's real administrator). When you perform your BFLA attack from a *different* IP address, it will stick out.
 
-## 4) Deliverables
+Students must provide:
 
-Each group must submit a professional PDF report containing:
-1. **Executive Summary:** High-level risk assessment.
-2. **Vulnerability Writeups (x6):** 
-    - Description, Impact, and Root Cause analysis.
-    - **Proof of Exploitation:** Screenshots.
-    - **Indicator of Compromise (IoC):** SIEM screenshots or queries showing the "digital footprint" of the attack.
-3. **Remediation:** Proposed code-level fixes for the vulnerabilities.
+- A screenshot(s) of the completed dashboard
+- A brief explanation of each panel and why it is useful
 
+3. **Splunk Alert**
+Students must configure one Splunk alert that triggers on suspicious behavior.
 
+Examples include:
 
+- Excessive authentication attempts
+- Abnormal request frequency
+- Unusual API access patterns
 
----
+Students must provide:
 
-## ⚖️ License & Attribution
-This lab is based on the **OWASP crAPI** project. 
-Copyright (c) 2021 OWASP Foundation. This project is licensed under the **Apache License 2.0**.
+- A screenshot of the alert configuration
+- A screenshot showing the alert in Triggered Alerts
+
+## Grading Rubric (100 Points)
+
+Project grading will follow the Excel rubric provided on Blackboard.
+
+Students should review the Excel rubric carefully, as it contains the detailed grading criteria used by instructors and graders.
+
+**Evaluation places strong emphasis on clear visual evidence through screenshots.** Screenshots should demonstrate:
+
+- Tools used (e.g., proxy tools, browser developer tools, etc.)
+- HTTP requests and responses
+- Successful exploitation of vulnerabilities
+- Log analysis and detection results
+
+> **⚠️ Important:** Reports lacking sufficient visual evidence may receive significantly lower grades even if explanations are provided.
+
+## Academic Integrity and Ethics
+
+- Perform attacks **only** against your local lab environment.
+- Do **not** share working exploit steps with other groups.
+- Do **not** search for or publish solutions online.
+
+## License and Attribution
+
+This project is based on the **OWASP crAPI** project.
+
+Copyright (c) 2021 OWASP Foundation.
+Licensed under the **Apache License 2.0**.

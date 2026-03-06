@@ -20,7 +20,11 @@ import com.crapi.entity.UserDetails;
 import com.crapi.model.CRAPIResponse;
 import com.crapi.model.VideoForm;
 import com.crapi.service.ProfileService;
+import com.crapi.service.UserService;
+import com.crapi.utils.SecurityLogger;
 import jakarta.servlet.http.HttpServletRequest;
+import java.util.HashMap;
+import java.util.Map;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -33,6 +37,8 @@ import org.springframework.web.multipart.MultipartFile;
 public class ProfileController {
 
   @Autowired ProfileService profileService;
+
+  @Autowired UserService userService;
 
   /**
    * @param videoId
@@ -98,8 +104,18 @@ public class ProfileController {
       @RequestBody VideoForm videoForm,
       HttpServletRequest request) {
     ProfileVideo profileVideo = profileService.updateProfileVideo(videoForm, request);
-    if (profileVideo != null) return ResponseEntity.status(HttpStatus.OK).body(profileVideo);
-    else
+    if (profileVideo != null) {
+      Map<String, Object> details = new HashMap<>();
+      details.put("video_id", videoId);
+      details.put("video_name", videoForm.getVideoName());
+      String userEmail = "";
+      try {
+        userEmail = userService.getUserFromToken(request).getEmail();
+      } catch (Exception ignored) {
+      }
+      SecurityLogger.logEvent("VIDEO_UPDATED", userEmail, details, "INFO");
+      return ResponseEntity.status(HttpStatus.OK).body(profileVideo);
+    } else
       return ResponseEntity.status(HttpStatus.NO_CONTENT)
           .body(new CRAPIResponse(UserMessage.SORRY_DIDNT_GET_PROFILE));
   }

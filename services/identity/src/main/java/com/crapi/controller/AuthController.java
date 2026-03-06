@@ -22,10 +22,13 @@ import com.crapi.model.*;
 import com.crapi.service.OtpService;
 import com.crapi.service.UserRegistrationService;
 import com.crapi.service.UserService;
+import com.crapi.utils.SecurityLogger;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -53,11 +56,26 @@ public class AuthController {
    *     encryption
    */
   @PostMapping("/login")
-  public ResponseEntity<JwtResponse> authenticateUser(@Valid @RequestBody LoginForm loginForm)
+  public ResponseEntity<JwtResponse> authenticateUser(
+      @Valid @RequestBody LoginForm loginForm, HttpServletRequest request)
       throws UnsupportedEncodingException {
     try {
-      return userService.authenticateUserLogin(loginForm);
+      ResponseEntity<JwtResponse> response = userService.authenticateUserLogin(loginForm);
+      Map<String, Object> details = new HashMap<>();
+      details.put("status", "SUCCESS");
+      details.put("uri", request.getRequestURI());
+      details.put("http_method", request.getMethod());
+      details.put("request_id", SecurityLogger.getOrGenerateRequestId(request));
+      SecurityLogger.logEvent("LOGIN_SUCCESS", loginForm.getEmail(), details, "INFO");
+      return response;
     } catch (BadCredentialsException e) {
+      Map<String, Object> details = new HashMap<>();
+      details.put("status", "FAILURE");
+      details.put("reason", "invalid_credentials");
+      details.put("uri", request.getRequestURI());
+      details.put("http_method", request.getMethod());
+      details.put("request_id", SecurityLogger.getOrGenerateRequestId(request));
+      SecurityLogger.logEvent("LOGIN_FAILURE", loginForm.getEmail(), details, "WARN");
       JwtResponse jwtResponse = new JwtResponse();
       jwtResponse.setMessage(UserMessage.INVALID_CREDENTIALS);
       return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(jwtResponse);
@@ -69,10 +87,17 @@ public class AuthController {
    * @return success and failure message after user registration.
    */
   @PostMapping("/signup")
-  public ResponseEntity<CRAPIResponse> registerUser(@Valid @RequestBody SignUpForm signUpRequest) {
+  public ResponseEntity<CRAPIResponse> registerUser(
+      @Valid @RequestBody SignUpForm signUpRequest, HttpServletRequest request) {
     // Creating user's account
     CRAPIResponse registerUserResponse = userRegistrationService.registerUser(signUpRequest);
     if (registerUserResponse != null && registerUserResponse.getStatus() == 200) {
+      Map<String, Object> details = new HashMap<>();
+      details.put("name", signUpRequest.getName());
+      details.put("uri", request.getRequestURI());
+      details.put("http_method", request.getMethod());
+      details.put("request_id", SecurityLogger.getOrGenerateRequestId(request));
+      SecurityLogger.logEvent("ACCOUNT_CREATED", signUpRequest.getEmail(), details, "INFO");
       return ResponseEntity.status(HttpStatus.OK).body(registerUserResponse);
     } else if (registerUserResponse != null && registerUserResponse.getStatus() == 403) {
       return ResponseEntity.status(HttpStatus.FORBIDDEN).body(registerUserResponse);

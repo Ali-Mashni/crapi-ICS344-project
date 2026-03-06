@@ -58,16 +58,15 @@ docker-compose version
 mkdir -p ~/crapi
 cd ~/crapi
 ```
+
 ---
 
 ## 3) Download crAPI Docker Compose File
 
 ```bash
-curl -L -o docker-compose.yml https://raw.githubusercontent.com/Ali-Mashni/crapi-ICS344-project/integrate-app-logs-splunk/deploy/docker/docker-compose.yml
+curl -L -o docker-compose.yml https://raw.githubusercontent.com/Ali-Mashni/crapi-ICS344-project/main/deploy/docker/docker-compose.yml
 docker-compose pull
 ```
-
-
 
 **Verify:**
 
@@ -110,6 +109,7 @@ http {
         '"request_id":"$request_id",'
         '"remote_addr":"$remote_addr",'
         '"real_ip":"$http_x_real_ip",'
+        '"x_forwarded_for":"$http_x_forwarded_for",'
         '"method":"$request_method",'
         '"uri":"$request_uri",'
         '"status":$status,'
@@ -155,7 +155,7 @@ Open `docker-compose.yml` and add the following services under `services:`.
 
 **Reverse Proxy Service:**
 
-```bash
+```yaml
   crapi-reverse-proxy:
     image: nginx:alpine
     container_name: crapi_reverse_proxy
@@ -170,7 +170,7 @@ Open `docker-compose.yml` and add the following services under `services:`.
 
 **Splunk Service:**
 
-```bash
+```yaml
   splunk:
     image: splunk/splunk:latest
     container_name: crapi_splunk
@@ -188,31 +188,9 @@ Open `docker-compose.yml` and add the following services under `services:`.
 
 ---
 
-## 6) Prevent Bypass (IMPORTANT)
-
-To ensure all traffic is logged, disable direct access to crapi-web.
-
-Find the `crapi-web` service in `docker-compose.yml` and comment out the `ports:` section.
-
-Example:
+## 6) Start Everything
 
 ```bash
-  crapi-web:
-    # ports:
-    #  - "127.0.0.1:8888:80"
-    #  - "127.0.0.1:8443:443"
-```
-
-This forces everyone to access crAPI via:
-
-`http://127.0.0.1:8080`
-
----
-
-## 7) Restart Everything
-
-```bash
-docker-compose -f docker-compose.yml down
 docker-compose -f docker-compose.yml --compatibility up -d
 ```
 
@@ -222,11 +200,13 @@ docker-compose -f docker-compose.yml --compatibility up -d
 docker-compose -f docker-compose.yml ps
 ```
 
+*Note: It may take a few minutes for Splunk and the database containers to fully initialize.*
+
 ---
 
-## 8) Verify Logging Works
+## 7) Verify Logging Works
 
-**Open:**
+**Open in your browser:**
 
 `http://127.0.0.1:8080`
 
@@ -236,13 +216,11 @@ Then check the log file:
 tail -n 10 logs/nginx/access.json
 ```
 
-You should see JSON entries.
-
-If the file is empty, you are likely browsing `:8888` instead of `:8080`.
+You should see JSON entries populating in the terminal.
 
 ---
 
-## 9) Configure Splunk
+## 8) Configure Splunk
 
 **Open:**
 
@@ -257,59 +235,40 @@ If the file is empty, you are likely browsing `:8888` instead of `:8080`.
 
 1. Go to **Settings** → **Add Data** → **Monitor**.
 2. Add Nginx access log first:
-
-```bash
-/data/nginx/access.json
-```
-
+   ```bash
+   /data/nginx/access.json
+   ```
 3. Create/select index:
-
-```bash
-nginx
-```
-
-4. Choose source type:
-
-```bash
-_json
-```
-
-5. Finish setup for `access.json`.
-
-6. Add `identity` app log:
-
-```bash
-/data/app/identity_security.jsonl
-```
-
-7. On **Set Source Type** for `identity`:
-  - Initially choose source type:
-
-```bash
-_json
-```
-
-  - Click **Save As** and set:
-    - **Name:** `json-2` (or `crapi_json`)
-
-8. In the **Timestamp** tab (identity), set:
-  - **Extraction:** `Advanced`
-  - **Timestamp format:** `%Y-%m-%dT%H:%M:%S.%NZ`
-  - **Timestamp fields:** `timestamp`
-
-9. Choose an index for app logs (example):
-
-```bash
-app
-
-```
-
-10. Add `community` and `workshop` app logs (repeat **Add Data** → **Monitor**):
-
-```bash
-/data/app/community_security.jsonl
-/data/app/workshop_security.jsonl
-```
-
-11. For `community` and `workshop` source type, use `_json` and keep timestamp extraction as **Automatic** (no custom timestamp format unless needed).
-
+   ```bash
+   nginx
+   ```
+4. Finish setup for `access.json` (Splunk will automatically detect the `_json` source type).
+5. Add `identity` app log:
+   ```bash
+   /data/app/identity_security.jsonl
+   ```
+6. On the **Set Source Type** page for `identity`:
+   - Initially choose source type: `_json`
+   - Go to the **Timestamp** tab.
+   - Set **Extraction:** `Advanced`
+   - Set **Timestamp format:** `%Y-%m-%dT%H:%M:%S.%NZ`
+   - Set **Timestamp fields:** `timestamp`
+   - *After* modifying the timestamp, click **Save As** and set the Name to `crapi_json`.
+7. On the **Input Settings** page, create a new index named:
+   ```bash
+   app
+   ```
+   Submit and finish the setup for `identity_security.jsonl`.
+8. Add the remaining app logs (Go to **Settings** → **Add Data** → **Monitor**):
+   ```bash
+   /data/app/community_security.jsonl
+   ```
+9. On the **Set Source Type** page:
+    - Ensure the source type is set to `_json` (leave timestamp extraction as automatic).
+10. On the **Input Settings** page:
+    - Set the Index to `app`.
+    - Submit and finish.
+11. Repeat steps 8-10 for the final log file:
+    ```bash
+    /data/app/workshop_security.jsonl
+    ```

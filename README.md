@@ -90,22 +90,34 @@ Attack work may involve techniques such as:
 Students must successfully demonstrate the following:
 
 1. **Broken Object Level Authorization (BOLA)**
-Students access resources belonging to another user by manipulating object identifiers.
+   Students access resources belonging to another user by manipulating object identifiers.
+   
+   **Objective:** Find an endpoint that returns user data and modify the ID to successfully retrieve sensitive information (such as vehicle data/location) belonging to a different user.
 
 2. **Broken Function Level Authorization (BFLA)**
-Students discover and access functionality intended only for privileged users.
+   Students discover and access functionality intended only for privileged users.
+   
+   **Objective:** Discover a hidden administrative endpoint and use it to perform an unauthorized destructive action against another user's data.
 
 3. **Mass Assignment / Business Logic Flaw**
-Students manipulate request parameters or hidden fields to gain unintended advantages.
+   Students manipulate request parameters or hidden fields to gain unintended advantages.
+   
+   **Objective:** Intercept an API request and inject/modify hidden JSON properties to bypass business logic (e.g., completing a transaction or acquiring an item without paying the required balance).
 
 4. **NoSQL Injection**
-Students exploit improper input validation in a database query.
+   Students exploit improper input validation in a database query.
+   
+   **Objective:** Bypass a database validation check by injecting NoSQL operators into the request payload instead of providing a valid string.
 
 5. **Server-Side Request Forgery (SSRF)**
-Students make a request to another site through the application to demonstrate SSRF behavior.
+   Students make a request to another site through the application to demonstrate SSRF behavior.
+   
+   **Objective:** Identify a feature that passes routing or URL parameters to the backend, and manipulate it to make the server fetch and return the content of an arbitrary external webpage (like google.com).
 
 6. **Broken Authentication (JWT Manipulation)**
-Students manipulate authentication tokens to access restricted resources.
+   Students manipulate authentication tokens to access restricted resources.
+   
+   **Objective:** Tamper with the payload or signature of your JSON Web Token (JWT) to elevate your privileges or impersonate another user without knowing their credentials.
 
 ### Required Evidence
 
@@ -146,18 +158,22 @@ Queries should detect suspicious patterns such as:
 
 
 2. **Splunk Dashboard**
-Students must create one dashboard with four panels.
+Students must create **one dashboard with at least four distinct panels** that visualize the attacks performed during the Red Team phase. 
 
 Each panel should visualize suspicious activity or security-relevant patterns, such as:
+- Unusual spikes in response sizes (`bytes_sent`) indicating data exfiltration or SSRF.
+- Unauthorized or anomalous access attempts to administrative endpoints (BFLA).
+- High enumeration rates (e.g., one user rapidly accessing many different resource IDs) indicating BOLA.
+- Spikes in HTTP 4xx or 5xx error codes corresponding to fuzzing or injection attempts.
 
-- Requests per IP
-- Request rates over time
-- Authentication failures
-- Unusual API usage patterns
+**Tips for a Realistic SOC Dashboard:**
+*   **Generate Baseline Traffic:** A security dashboard isn't very useful if it only shows your attacks! To make your dashboard look like a real enterprise environment, generate "normal" background traffic (regular logins, viewing dashboards, buying items) so your attacks stand out as clear anomalies against the baseline.
+*   **Simulate Multiple IPs:** In the real world, traffic comes from many different sources. You can simulate this by generating traffic from both your Windows host machine and your Kali VM. 
+*   **The "Admin" Anomaly (Hint):** Think about how a SOC detects an unauthorized user in an admin portal. Try generating baseline "normal" traffic to the admin endpoints from one specific IP address (representing the company's real administrator). When you perform your BFLA attack from a *different* IP address, it will stick out.
 
 Students must provide:
 
-- A screenshot of the completed dashboard
+- A screenshot(s) of the completed dashboard
 - A brief explanation of each panel and why it is useful
 
 3. **Splunk Alert**

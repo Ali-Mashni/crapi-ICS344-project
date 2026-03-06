@@ -162,7 +162,7 @@ Open `docker-compose.yml` and add the following services under `services:`.
     depends_on:
       - crapi-web
     ports:
-      - "127.0.0.1:8080:80"
+      - "8080:80"
     volumes:
       - ./reverse-proxy/nginx.conf:/etc/nginx/nginx.conf:ro
       - ./logs/nginx:/var/log/nginx

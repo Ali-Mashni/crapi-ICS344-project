@@ -140,7 +140,7 @@ The goal is to understand how malicious activity can be detected through log ana
 Students must produce the following detection components.
 
 1. **Detection Queries**
-Students must write at least four SPL detection queries.
+Students must write 4 SPL detection queries.
 
 Each detection must include:
 
@@ -158,7 +158,7 @@ Queries should detect suspicious patterns such as:
 
 
 2. **Splunk Dashboard**
-Students must create **one dashboard with at least four distinct panels** that visualize the attacks performed during the Red Team phase. 
+Students must create **one dashboard with 4 distinct panels** that visualize the attacks performed during the Red Team phase. 
 
 Each panel should visualize suspicious activity or security-relevant patterns, such as:
 - Unusual spikes in response sizes (`bytes_sent`) indicating data exfiltration or SSRF.
@@ -209,7 +209,6 @@ Students should review the Excel rubric carefully, as it contains the detailed g
 
 - Perform attacks **only** against your local lab environment.
 - Do **not** share working exploit steps with other groups.
-- Do **not** search for or publish solutions online.
 
 ## License and Attribution
 

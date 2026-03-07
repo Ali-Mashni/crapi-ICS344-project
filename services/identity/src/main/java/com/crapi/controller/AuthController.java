@@ -57,7 +57,7 @@ public class AuthController {
    */
   @PostMapping("/login")
   public ResponseEntity<JwtResponse> authenticateUser(
-      @Valid @RequestBody LoginForm loginForm, HttpServletRequest request) {
+      @Valid @RequestBody LoginForm loginForm, HttpServletRequest request) throws UnsupportedEncodingException {
     try {
       ResponseEntity<JwtResponse> response = userService.authenticateUserLogin(loginForm);
       Map<String, Object> details = new HashMap<>();

@@ -57,17 +57,30 @@ public class AuthController {
    */
   @PostMapping("/login")
   public ResponseEntity<JwtResponse> authenticateUser(
-      @Valid @RequestBody LoginForm loginForm, HttpServletRequest request)
-      throws UnsupportedEncodingException {
+      @Valid @RequestBody LoginForm loginForm, HttpServletRequest request) {
     try {
       ResponseEntity<JwtResponse> response = userService.authenticateUserLogin(loginForm);
       Map<String, Object> details = new HashMap<>();
-      details.put("status", "SUCCESS");
       details.put("uri", request.getRequestURI());
       details.put("http_method", request.getMethod());
       details.put("request_id", SecurityLogger.getOrGenerateRequestId(request));
-      SecurityLogger.logEvent("LOGIN_SUCCESS", loginForm.getEmail(), details, "INFO");
+
+      // Check if the login was actually successful (HTTP 200 OK)
+      if (response.getStatusCode().is2xxSuccessful()) {
+          details.put("status", "SUCCESS");
+          SecurityLogger.logEvent("LOGIN_SUCCESS", loginForm.getEmail(), details, "INFO");
+      } else {
+          // The login failed (e.g. HTTP 401 or 400)
+          details.put("status", "FAILURE");
+          if (response.getBody() != null && response.getBody().getMessage() != null) {
+              details.put("reason", response.getBody().getMessage());
+          } else {
+              details.put("reason", "invalid_credentials");
+          }
+          SecurityLogger.logEvent("LOGIN_FAILURE", loginForm.getEmail(), details, "WARN");
+      }
       return response;
+      
     } catch (BadCredentialsException e) {
       Map<String, Object> details = new HashMap<>();
       details.put("status", "FAILURE");
@@ -76,6 +89,7 @@ public class AuthController {
       details.put("http_method", request.getMethod());
       details.put("request_id", SecurityLogger.getOrGenerateRequestId(request));
       SecurityLogger.logEvent("LOGIN_FAILURE", loginForm.getEmail(), details, "WARN");
+      
       JwtResponse jwtResponse = new JwtResponse();
       jwtResponse.setMessage(UserMessage.INVALID_CREDENTIALS);
       return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(jwtResponse);
